@@ -13,7 +13,7 @@ public final class Claim {
     /** The patient id. */
     private String patientId;
     /** The claim amount. */
-    private double amount;
+    private Double amount;
     /** The claim status. */
     private String status;
     /** The creation timestamp. */

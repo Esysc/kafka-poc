@@ -1,0 +1,60 @@
+# Java
+spring-kafka-claims/target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven
+/logs/
+/.mvn/
+!/.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python venv
+.venv/
+venv/
+ENV/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ansible
+.ansible/
+
+# Misc
+*.log
+*.swp
+*.swo
+
+# Node
+node_modules/
+
+# Coverage
+coverage/
+*.cover
+*.py,cover
+.hypothesis/
+
+# Others
+.env
+.env.*
+
+# Docker
+**/.docker/
+**/docker-compose.override.yml

@@ -36,7 +36,7 @@ public final class Claim {
     public Claim(
         final String idParam,
         final String patientIdParam,
-        final double amountParam,
+        final Double amountParam,
         final String statusParam,
         final Instant createdAtParam
     ) {

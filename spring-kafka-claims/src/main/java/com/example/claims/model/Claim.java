@@ -83,7 +83,7 @@ public final class Claim {
      * Gets the claim amount.
      * @return the amount
      */
-    public double getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
@@ -91,7 +91,7 @@ public final class Claim {
      * Sets the claim amount.
      * @param value the amount to set
      */
-    public void setAmount(final double value) {
+    public void setAmount(final Double value) {
         this.amount = value;
     }
 

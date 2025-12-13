@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up pre-commit
+        run: |
+          python -m pip install --upgrade pip
+          pip install pre-commit
+      - name: Install Maven
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+          mvn -version
+      - name: Ensure Docker is installed (for act)
+        run: |
+          if ! command -v docker >/dev/null 2>&1; then
+            echo "Docker not found, installing..."
+            sudo apt-get update
+            sudo apt-get install -y docker.io
+            sudo systemctl start docker || true
+            sudo usermod -aG docker $USER || true
+            docker --version
+          else
+            echo "Docker already installed."
+          fi
+        shell: bash
+      - name: Install Ansible and dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          ansible-galaxy collection install -r ansible/requirements.yml
+
+      - name: Run pre-commit hooks
+        run: |
+          pre-commit run --all-files
+      - name: Run Ansible playbook (start)
+        run: |
+          ansible-playbook ansible/playbook.yml --tags start
+
+      - name: Wait for Spring Boot app
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:8080/actuator/health | grep UP; then echo 'Spring Boot is up!'; exit 0; fi
+            sleep 2
+          done
+          echo 'Spring Boot did not start in time.'; exit 1
+
+      - name: Integration test - POST and GET claim
+        run: |
+          CLAIM_JSON='{"id":"c1","patientId":"p1","amount":1500.0,"status":"NEW","createdAt":"2025-12-12T10:00:00Z"}'
+          curl -X POST http://localhost:8080/api/claims \
+            -H 'Content-Type: application/json' \
+            -d "$CLAIM_JSON"
+          sleep 2
+          RESPONSE=$(curl -s http://localhost:8080/api/topic-log)
+          echo "$RESPONSE" | grep -q "$CLAIM_JSON"

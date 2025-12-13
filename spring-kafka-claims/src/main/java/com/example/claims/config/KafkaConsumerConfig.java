@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
  * This class is not intended for extension.
  */
 @Configuration
-public final class KafkaConsumerConfig {
+public class KafkaConsumerConfig {
 
     /** Kafka bootstrap servers property. */
     @Value("${spring.kafka.bootstrap-servers}")

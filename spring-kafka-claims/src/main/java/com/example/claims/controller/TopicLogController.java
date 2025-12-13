@@ -15,7 +15,7 @@ import java.util.List;
  * This class is not intended for extension.
  */
 @RestController
-public final class TopicLogController {
+public class TopicLogController {
 
     /** Maximum number of logs to keep. */
     private static final int MAX_LOGS = 100;

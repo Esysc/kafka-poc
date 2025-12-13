@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/claims")
-public final class ClaimController {
+public class ClaimController {
     /**
      * Kafka template for sending claims.
      */

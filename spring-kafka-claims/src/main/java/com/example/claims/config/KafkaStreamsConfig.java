@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
  * This class is not intended for extension.
  */
 @Configuration
-public final class KafkaStreamsConfig {
+public class KafkaStreamsConfig {
     /**
      * Provides a StreamsBuilder bean for Kafka Streams.
      *

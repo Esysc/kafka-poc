@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  * This class is not intended for extension.
  */
 @Component
-public final class HighValueConsumer {
+public class HighValueConsumer {
     /** Logger for this class. */
         private static final Logger LOG =
                 LoggerFactory.getLogger(HighValueConsumer.class);

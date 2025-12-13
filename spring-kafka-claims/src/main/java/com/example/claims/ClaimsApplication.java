@@ -1,21 +1,19 @@
-
 package com.example.claims;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Entry point for the Claims Spring Boot application.
- * <p>
- * This is a utility class and cannot be instantiated.
+ * Main entry point for the Claims Spring Boot application.
  */
 @SpringBootApplication
-public final class ClaimsApplication {
+public class ClaimsApplication {
+
     /**
-     * Private constructor to prevent instantiation.
+     * Public no-argument constructor required by Spring Boot and Checkstyle.
      */
-    private ClaimsApplication() {
-        throw new UnsupportedOperationException("Utility class");
+    public ClaimsApplication() {
+        // Default constructor
     }
 
     /**

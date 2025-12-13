@@ -1,0 +1,152 @@
+- name: Local Kafka stack management
+  hosts: localhost
+  become: false
+  connection: local
+  vars_files:
+    - vars.yml
+  vars:
+    project_dir: "{{ lookup('env','PWD') }}"
+
+  # Detect Docker context and set DOCKER_HOST if not using 'default' context
+  pre_tasks:
+    - name: Get current Docker context
+      community.docker.docker_context_info:
+      register: docker_context_info
+      tags:
+        - always
+
+    - name: Set DOCKER_HOST to current context's docker_host if not 'default'
+      ansible.builtin.set_fact:
+        docker_host_env: "{{ (docker_context_info.contexts | selectattr('current', 'equalto', true) | map(attribute='config.docker_host') | list)[0] }}"
+      when:
+        - (docker_context_info.contexts | selectattr('current', 'equalto', true) | map(attribute='name') | list)[0] != 'default'
+      tags:
+        - always
+
+  environment: "{{ {'DOCKER_HOST': docker_host_env} if docker_host_env is defined else {} }}"
+  tasks:
+    # Maven build is not required; Docker Compose handles everything
+    - name: Start Kafka stack with docker_compose_v2
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_dir }}"
+        files:
+          - docker-compose.yml
+        state: present
+      tags:
+        - start
+    - name: Wait for kafka to be ready
+      ansible.builtin.wait_for:
+        host: "{{ kafka_host }}"
+        port: "{{ kafka_port }}"
+        timeout: 60
+      tags:
+        - start
+    - name: Create claims-input topic
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - -f
+          - "{{ project_dir }}/docker-compose.yml"
+          - exec
+          - -T
+          - kafka
+          - kafka-topics
+          - --bootstrap-server
+          - "{{ kafka_host }}:{{ kafka_port }}"
+          - --create
+          - --if-not-exists
+          - --topic
+          - claims-input
+          - --partitions
+          - "1"
+          - --replication-factor
+          - "1"
+      args:
+        chdir: "{{ project_dir }}"
+      register: create_claims_input
+      changed_when: false
+      tags:
+        - start
+
+    - name: Create claims-highvalue topic
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - -f
+          - "{{ project_dir }}/docker-compose.yml"
+          - exec
+          - -T
+          - kafka
+          - kafka-topics
+          - --bootstrap-server
+          - "{{ kafka_host }}:{{ kafka_port }}"
+          - --create
+          - --if-not-exists
+          - --topic
+          - claims-highvalue
+          - --partitions
+          - "1"
+          - --replication-factor
+          - "1"
+      args:
+        chdir: "{{ project_dir }}"
+      register: create_claims_highvalue
+      changed_when: false
+      tags:
+        - start
+
+    - name: Wait for Spring Boot app to be ready (port {{ spring_port }})
+      ansible.builtin.wait_for:
+        host: "{{ spring_host }}"
+        port: "{{ spring_port }}"
+        timeout: 60
+      tags:
+        - start
+
+    - name: Ensure containers are running (health check)
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_dir }}"
+        files:
+          - docker-compose.yml
+        state: present
+      tags:
+        - start
+
+    - name: Get last 100 lines of logs for all services
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - -f
+          - "{{ project_dir }}/docker-compose.yml"
+          - logs
+          - --no-log-prefix
+          - --tail=100
+      args:
+        chdir: "{{ project_dir }}"
+      register: logs_output
+      changed_when: false
+      tags:
+        - start
+        - logs
+
+    - name: Print logs output
+      ansible.builtin.debug:
+        var: logs_output.stdout_lines
+      tags:
+        - start
+        - logs
+
+    # The Spring Boot app is now started as part of docker compose up
+
+    - name: Stop all services (Kafka, Zookeeper, Spring Boot app)
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_dir }}"
+        files:
+          - docker-compose.yml
+        state: absent
+      failed_when: false
+      tags:
+        - stop

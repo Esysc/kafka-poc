@@ -1,0 +1,34 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+
+  - repo: local
+    hooks:
+      - id: ansible-lint
+        name: ansible-lint
+        language: system
+        entry: ansible-lint
+        files: ^ansible/.*\.(yaml|yml)$
+        types: [yaml]
+
+  - repo: local
+    hooks:
+      - id: maven-checkstyle
+        name: maven-checkstyle
+        entry: mvn
+        args:
+        - -f
+        - spring-kafka-claims/pom.xml
+        - "checkstyle:check"
+        language: system
+        pass_filenames: false
+        types: [java]
+        # Ensure the hook only runs if the pom.xml exists
+        files: ^spring-kafka-claims/
+        stages: [pre-commit]  # Only run on actual commits, not CI

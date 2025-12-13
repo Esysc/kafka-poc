@@ -56,7 +56,7 @@ jobs:
       - name: Integration test - POST claim
         run: |
           sleep 10
-          CLAIM_JSON='{"id":"c1","patientId":"p1","amount":1500.0,"status":"NEW","createdAt":"2025-12-12T10:00:00Z"}'
+          CLAIM_JSON=$(jq -n --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '{"id":"c1","patientId":"p1","amount":1500.0,"status":"NEW","createdAt":$now}')
           docker compose exec -T spring-kafka-claims curl -X POST http://localhost:8080/api/claims \
           -H 'Content-Type: application/json' \
           -d "$CLAIM_JSON"

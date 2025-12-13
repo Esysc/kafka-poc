@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * This class is not intended for extension.
  */
 @Component
-public final class ClaimsInputConsumer {
+public class ClaimsInputConsumer {
 
     /**
      * Listens for incoming claim messages.

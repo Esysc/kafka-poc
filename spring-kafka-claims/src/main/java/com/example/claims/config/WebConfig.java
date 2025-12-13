@@ -13,7 +13,7 @@ import org.springframework.lang.NonNull;
  * This class is not intended for extension.
  */
 @Configuration
-public final class WebConfig {
+public class WebConfig {
     /**
      * Provides a WebMvcConfigurer bean to configure CORS.
      *

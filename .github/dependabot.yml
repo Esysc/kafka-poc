@@ -1,0 +1,66 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/spring-kafka-claims"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "andreacristalli"
+    labels:
+      - "dependencies"
+      - "java"
+
+  - package-ecosystem: "docker"
+    directory: "/spring-kafka-claims"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "andreacristalli"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker-compose"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:30"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "andreacristalli"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "05:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "andreacristalli"
+    labels:
+      - "dependencies"
+      - "python"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "05:30"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "andreacristalli"
+    labels:
+      - "dependencies"
+      - "github-actions"

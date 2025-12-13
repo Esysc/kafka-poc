@@ -21,24 +21,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pre-commit
+
       - name: Install Maven
         run: |
           sudo apt-get update
           sudo apt-get install -y maven
           mvn -version
-      - name: Ensure Docker is installed (for act)
-        run: |
-          if ! command -v docker >/dev/null 2>&1; then
-            echo "Docker not found, installing..."
-            sudo apt-get update
-            sudo apt-get install -y docker.io
-            sudo systemctl start docker || true
-            sudo usermod -aG docker $USER || true
-            docker --version
-          else
-            echo "Docker already installed."
-          fi
-        shell: bash
+
       - name: Install Ansible and dependencies
         run: |
           python -m pip install --upgrade pip
@@ -46,26 +35,39 @@ jobs:
           ansible-galaxy collection install -r ansible/requirements.yml
 
       - name: Run pre-commit hooks
-        run: |
-          pre-commit run --all-files
-      - name: Run Ansible playbook (start)
-        run: |
-          ansible-playbook ansible/playbook.yml --tags start
+        run: pre-commit run --all-files
 
-      - name: Wait for Spring Boot app
+      - name: Run Ansible playbook (start)
+        run: ansible-playbook ansible/playbook.yml --tags start
+
+      # ✅ FIXED: Docker Compose health check (replaces curl localhost)
+      - name: Wait for Spring Boot app (Docker Compose)
         run: |
           for i in {1..30}; do
-            if curl -s http://localhost:8080/actuator/health | grep UP; then echo 'Spring Boot is up!'; exit 0; fi
+            if docker compose -f docker-compose.yml exec -T spring-kafka-claims curl -s http://localhost:8080/actuator/health | grep UP; then
+              echo 'Spring Boot is up!'
+              exit 0
+            fi
             sleep 2
           done
-          echo 'Spring Boot did not start in time.'; exit 1
-
-      - name: Integration test - POST and GET claim
+          echo 'Spring Boot did not start in time.'
+          docker compose logs spring-kafka-claims
+          exit 1
+      - name: Integration test - POST claim
         run: |
+          sleep 10
           CLAIM_JSON='{"id":"c1","patientId":"p1","amount":1500.0,"status":"NEW","createdAt":"2025-12-12T10:00:00Z"}'
-          curl -X POST http://localhost:8080/api/claims \
-            -H 'Content-Type: application/json' \
-            -d "$CLAIM_JSON"
-          sleep 2
-          RESPONSE=$(curl -s http://localhost:8080/api/topic-log)
-          echo "$RESPONSE" | grep -q "$CLAIM_JSON"
+          docker compose exec -T spring-kafka-claims curl -X POST http://localhost:8080/api/claims \
+          -H 'Content-Type: application/json' \
+          -d "$CLAIM_JSON"
+      - name: Integration test - GET and check claim
+        run: |
+          echo "Waiting for a minute to allow processing..."
+          sleep 60
+          RESPONSE=$(docker compose exec -T spring-kafka-claims curl -s -H 'Accept: application/json' http://localhost:8080/api/topic-log)
+          echo "$RESPONSE"
+          echo "$RESPONSE" | grep -q '"id":"c1"' || (echo "Claim not found in response"; exit 1)
+
+      - name: Show logs on failure (optional)
+        if: failure()
+        run: docker compose logs --tail=50

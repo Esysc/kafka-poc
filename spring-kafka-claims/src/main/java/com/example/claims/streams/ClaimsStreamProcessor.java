@@ -24,7 +24,7 @@ import java.time.Duration;
  * This class is not intended for extension.
  */
 @Configuration
-public final class ClaimsStreamProcessor {
+public class ClaimsStreamProcessor {
     /** Logger for this class. */
     private static final Logger LOG =
         LoggerFactory.getLogger(ClaimsStreamProcessor.class);

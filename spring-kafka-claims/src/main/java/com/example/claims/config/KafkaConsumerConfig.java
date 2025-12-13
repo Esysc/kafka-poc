@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
  * This class is not intended for extension.
  */
 @Configuration
-public final class KafkaConsumerConfig {
+public class KafkaConsumerConfig {
 
     /** Kafka bootstrap servers property. */
     @Value("${spring.kafka.bootstrap-servers}")
@@ -77,7 +77,10 @@ public final class KafkaConsumerConfig {
         claimKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, Claim> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory((ConsumerFactory<? super String, ? super Claim>) claimConsumerFactory());
+        factory.setConsumerFactory(
+            (ConsumerFactory<? super String, ? super Claim>)
+                claimConsumerFactory()
+        );
         return factory;
     }
 }

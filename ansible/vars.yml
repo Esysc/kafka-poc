@@ -1,5 +1,5 @@
 # Centralized variables for Ansible playbook
-kafka_host: 127.0.0.1
+kafka_host: localhost
 kafka_port: 9092
-spring_host: 127.0.0.1
+spring_host: localhost
 spring_port: 8080

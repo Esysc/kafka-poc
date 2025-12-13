@@ -77,7 +77,10 @@ public final class KafkaConsumerConfig {
         claimKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, Claim> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory((ConsumerFactory<? super String, ? super Claim>) claimConsumerFactory());
+        factory.setConsumerFactory(
+            (ConsumerFactory<? super String, ? super Claim>)
+                claimConsumerFactory()
+        );
         return factory;
     }
 }

@@ -1,0 +1,33 @@
+spring:
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    consumer:
+      group-id: claims-app
+      auto-offset-reset: earliest
+    properties:
+      spring.json.trusted.packages: com.example.claims.model,com.example"
+    streams:
+      application-id: claims-streams-app
+      auto-startup: true
+      properties:
+        cache.max.bytes.buffering: 0
+        default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        default.value.serde: org.springframework.kafka.support.serializer.JsonSerde
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus,health,info"
+  endpoint:
+    prometheus:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.example.claims: INFO
+    org.apache.kafka: INFO

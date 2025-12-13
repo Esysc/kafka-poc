@@ -6,7 +6,7 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # ---- Run stage ----
-FROM eclipse-temurin:21-jdk-jammy
+FROM eclipse-temurin:25-jdk-jammy
 WORKDIR /app
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 COPY --from=build /build/target/spring-kafka-claims-0.0.1-SNAPSHOT.jar app.jar

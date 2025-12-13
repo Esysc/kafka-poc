@@ -1,33 +1,35 @@
 services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
-
   kafka:
     image: confluentinc/cp-kafka:8.1.1
-    depends_on:
-      - zookeeper
+    hostname: kafka
+    container_name: kafka-poc-kafka-1
     ports:
       - "9092:9092"
+      - "29093:29093"  # Controller port (KRaft required)
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'  # ← KRaft mode (replaces ZooKeeper)
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk  # ← Generate with: docker run --rm confluentinc/cp-kafka:8.1.1 kafka-storage random-uuid
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT_HOST://0.0.0.0:9092,CONTROLLER://0.0.0.0:29093,PLAINTEXT://kafka:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
     healthcheck:
       test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
-      interval: 10s
+      interval: 30s
       timeout: 10s
-      retries: 5
+      retries: 3
+      start_period: 60s
 
-# To create topics after startup, use a script or manual command:
-# docker-compose exec kafka kafka-topics --create --topic claims-input --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
-# docker-compose exec kafka kafka-topics --create --topic claims-highvalue --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+  # To create topics after startup:
+  # docker compose exec kafka kafka-topics --create --topic claims-input --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+  # docker compose exec kafka kafka-topics --create --topic claims-highvalue --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
 
   spring-kafka-claims:
     build:
@@ -38,7 +40,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: default
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092  # ← Works with PLAINTEXT://kafka:29092
     ports:
       - "8080:8080"
     healthcheck:

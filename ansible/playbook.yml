@@ -144,7 +144,7 @@
 
     # The Spring Boot app is now started as part of docker compose up
 
-    - name: Stop all services (Kafka, Zookeeper, Spring Boot app)
+    - name: Stop all services (Kafka, Spring Boot app)
       community.docker.docker_compose_v2:
         project_src: "{{ project_dir }}"
         files:

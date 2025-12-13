@@ -1,6 +1,6 @@
 
 # ---- Build stage ----
-FROM maven:3.9.6-eclipse-temurin-21 AS build
+FROM maven:3.9-eclipse-temurin-11 AS build
 WORKDIR /build
 COPY . .
 RUN mvn clean package -DskipTests

@@ -1,3 +1,68 @@
+# Kafka Claims Processing Architecture
+
+```mermaid
+flowchart TD
+    %% Style definitions for color and high-contrast text
+    classDef user fill:#1976d2,color:#fff,stroke:#0d47a1,stroke-width:2px;
+    classDef spring fill:#fff176,color:#212121,stroke:#fbc02d,stroke-width:2px;
+    classDef kafka fill:#43a047,color:#fff,stroke:#1b5e20,stroke-width:2px;
+    classDef monitoring fill:#d81b60,color:#fff,stroke:#880e4f,stroke-width:2px;
+    classDef exporter fill:#7e57c2,color:#fff,stroke:#4527a0,stroke-width:2px;
+
+    A[REST Client / User]
+    B[API: /api/claims]
+    C[Kafka Producer]
+    F[claims-input Topic]
+    D[Kafka Streams Processor]
+    G[claims-highvalue Topic]
+    E[Kafka Consumer]
+    J[kafka-exporter]
+    H[Prometheus]
+    I[Grafana]
+
+    A --> B
+    B --> C
+    C --> F
+    F --> D
+    D --> G
+    G --> E
+    E --> H
+    J --> H
+    H --> I
+    F -.-> J
+    G -.-> J
+    E -.-> H
+
+    %% Assign classes for color and contrast
+    class A user;
+    class B,C,D,E spring;
+    class F,G kafka;
+    class H,I monitoring;
+    class J exporter;
+
+    %% Grouping visually with subgraphs (vertical)
+    subgraph User
+        A
+    end
+    subgraph Spring_Boot_Application
+        B
+        C
+        D
+        E
+    end
+    subgraph Kafka_Cluster
+        F
+        G
+    end
+    subgraph Monitoring_Stack
+        J
+        H
+        I
+    end
+```
+
+---
+
 # What does the Spring Boot app do?
 
 This Spring Boot application implements a full Kafka-based claims processing pipeline:
@@ -145,6 +210,6 @@ This returns a JSON array of Claim objects currently in the topic log buffer.
 
 ## What's next
 
-- Add Grafana dashboard wiring to visualize `claims.highvalue.processed`.
 - Extend Ansible to deploy to remote hosts and containerize the Spring app.
 - Extend tests to assert Streams topology outputs.
+- Further customize Grafana dashboards or add alerting as needed.

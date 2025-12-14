@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
+
 import com.example.claims.consumer.ClaimsInputConsumer;
+import org.apache.commons.text.StringEscapeUtils;
 /**
  * Controller for claim-related endpoints.
  * <p>
@@ -74,6 +76,8 @@ public class ClaimController {
             );
         kafkaTemplate.send("claims-input", claimId, claim);
         LOG.info("Posted claim with id {}", claimId);
-        return ResponseEntity.ok("Claim posted with id: " + claimId);
+        String responseMessage = "{\"message\": \"Claim posted with id: "
+            + StringEscapeUtils.escapeJson(claimId) + "\"}";
+        return ResponseEntity.ok(responseMessage);
     }
 }

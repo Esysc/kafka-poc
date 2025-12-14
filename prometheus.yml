@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka-exporter:9308']
+  - job_name: 'spring-kafka-claims'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['spring-kafka-claims:8080']

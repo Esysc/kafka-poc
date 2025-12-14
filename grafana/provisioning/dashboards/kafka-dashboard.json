@@ -1,0 +1,109 @@
+{
+  "id": null,
+  "uid": "kafka-exporter-dashboard",
+  "title": "Kafka Exporter Overview",
+  "tags": ["kafka", "exporter", "monitoring"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Kafka Brokers",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "kafka_brokers", "legendFormat": "Brokers" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 }
+    },
+    {
+      "type": "stat",
+      "title": "Partitions per Topic",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(kafka_topic_partitions) by (topic)", "legendFormat": "{{topic}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 8, "x": 4, "y": 0 }
+    },
+    {
+      "type": "stat",
+      "title": "Consumer Group Members",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(kafka_consumergroup_members) by (consumergroup)", "legendFormat": "{{consumergroup}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 8, "x": 12, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Consumer Group Lag Over Time",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "kafka_consumergroup_lag", "legendFormat": "{{consumergroup}}/{{topic}}/{{partition}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Partition Offsets Over Time",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "kafka_topic_partition_current_offset", "legendFormat": "{{topic}}/{{partition}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Consumer Group Offsets Over Time",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "kafka_consumergroup_current_offset", "legendFormat": "{{consumergroup}}/{{topic}}/{{partition}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 }
+    },
+    {
+      "type": "stat",
+      "title": "Go Goroutines",
+      "datasource": "Prometheus",
+      "targets": [ { "expr": "go_goroutines", "legendFormat": "Goroutines" } ],
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 20 }
+    },
+    {
+      "type": "stat",
+      "title": "Process CPU Seconds",
+      "datasource": "Prometheus",
+      "targets": [ { "expr": "process_cpu_seconds_total", "legendFormat": "CPU Seconds" } ],
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 20 }
+    },
+    {
+      "type": "stat",
+      "title": "Process Memory (RSS)",
+      "datasource": "Prometheus",
+      "targets": [ { "expr": "process_resident_memory_bytes", "legendFormat": "RSS" } ],
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 20 }
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]
+  }
+}

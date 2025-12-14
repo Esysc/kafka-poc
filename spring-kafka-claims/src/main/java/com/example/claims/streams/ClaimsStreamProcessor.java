@@ -1,7 +1,8 @@
 
 package com.example.claims.streams;
 
-import com.example.claims.model.Claim;
+import com.example.claims.avro.Claim;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Consumed;
@@ -15,8 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.support.serializer.JsonSerde;
 import java.time.Duration;
+import java.util.Map;
+import java.util.Collections;
 
 /**
  * Kafka Streams processor for claims.
@@ -41,7 +43,15 @@ public class ClaimsStreamProcessor {
      */
     @Bean
     public KStream<String, Claim> kStream(final StreamsBuilder builder) {
-        final JsonSerde<Claim> claimSerde = new JsonSerde<>(Claim.class);
+        final SpecificAvroSerde<Claim> claimSerde = new SpecificAvroSerde<>();
+        // Configure schema registry URL for Avro Serde
+        // (required for tests and runtime)
+        Map<String, String> serdeConfig =
+            Collections.singletonMap(
+                "schema.registry.url",
+                "mock://test"
+            );
+        claimSerde.configure(serdeConfig, false);
 
         final KStream<String, Claim> input = builder.stream(
             "claims-input",
@@ -61,10 +71,10 @@ public class ClaimsStreamProcessor {
         );
 
         // Example aggregation: sum amounts per patient over tumbling window
-        high.map((k, v) -> KeyValue.pair(v.getPatientId(), v.getAmount()))
-            .groupByKey(
-                Grouped.with(Serdes.String(), Serdes.Double())
+        high.map((k, v) ->
+                KeyValue.pair(v.getPatientId().toString(), v.getAmount())
             )
+            .groupByKey(Grouped.with(Serdes.String(), Serdes.Double()))
             .windowedBy(
                 TimeWindows.ofSizeWithNoGrace(
                     Duration.ofMinutes(WINDOW_MINUTES)

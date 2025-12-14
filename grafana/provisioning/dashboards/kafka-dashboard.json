@@ -11,6 +11,8 @@
     {
       "type": "stat",
       "title": "Kafka Brokers",
+      "description": "Shows the current number of Kafka brokers in the cluster. Brokers are the servers that store and serve Kafka topics. A healthy cluster should have all expected brokers online. Sudden drops may indicate broker failures or network issues.",
+      "description": "Shows the current number of Kafka brokers in the cluster. Brokers are the servers that store and serve Kafka topics. A healthy cluster should have all expected brokers online. Sudden drops may indicate broker failures or network issues.",
       "datasource": "Prometheus",
       "targets": [
         { "expr": "kafka_brokers", "legendFormat": "Brokers" }
@@ -21,6 +23,8 @@
     {
       "type": "stat",
       "title": "Partitions per Topic",
+      "description": "Displays the number of partitions for each Kafka topic. Partitions allow Kafka to scale horizontally and provide parallelism. Monitoring partition counts helps ensure even data distribution and can highlight configuration or scaling issues.",
+      "description": "Displays the number of partitions for each Kafka topic. Partitions allow Kafka to scale horizontally and provide parallelism. Monitoring partition counts helps ensure even data distribution and can highlight configuration or scaling issues.",
       "datasource": "Prometheus",
       "targets": [
         { "expr": "sum(kafka_topic_partitions) by (topic)", "legendFormat": "{{topic}}" }
@@ -31,6 +35,8 @@
     {
       "type": "stat",
       "title": "Consumer Group Members",
+      "description": "Shows the number of active members in each Kafka consumer group. Each member is a consumer instance. Changes in group size can indicate scaling events or consumer failures.",
+      "description": "Shows the number of active members in each Kafka consumer group. Each member is a consumer instance. Changes in group size can indicate scaling events or consumer failures.",
       "datasource": "Prometheus",
       "targets": [
         { "expr": "sum(kafka_consumergroup_members) by (consumergroup)", "legendFormat": "{{consumergroup}}" }
@@ -41,6 +47,7 @@
     {
       "type": "timeseries",
       "title": "Consumer Group Lag Over Time",
+      "description": "Consumer Group Lag Over Time shows how many messages a Kafka consumer group is behind the latest messages available in a topic as time progresses. High or increasing lag means consumers are not keeping up with producers. This metric is key for monitoring consumer health and detecting bottlenecks.",
       "datasource": "Prometheus",
       "targets": [
         { "expr": "kafka_consumergroup_lag", "legendFormat": "{{consumergroup}}/{{topic}}/{{partition}}" }
@@ -51,6 +58,7 @@
     {
       "type": "timeseries",
       "title": "Partition Offsets Over Time",
+      "description": "Partition Offsets Over Time shows the latest offset for each Kafka topic partition as it increases over time. This represents the total number of messages written to each partition. It helps visualize message production rate and data growth, and is useful for monitoring topic activity and partition usage.",
       "datasource": "Prometheus",
       "targets": [
         { "expr": "kafka_topic_partition_current_offset", "legendFormat": "{{topic}}/{{partition}}" }
@@ -61,6 +69,7 @@
     {
       "type": "timeseries",
       "title": "Consumer Group Offsets Over Time",
+      "description": "Consumer Group Offsets Over Time shows the position (offset) up to which a Kafka consumer group has read messages from a topic partition, tracked as it changes over time. This helps visualize how quickly the group is progressing through the topic and is useful for troubleshooting and capacity planning.",
       "datasource": "Prometheus",
       "targets": [
         { "expr": "kafka_consumergroup_current_offset", "legendFormat": "{{consumergroup}}/{{topic}}/{{partition}}" }
@@ -71,6 +80,8 @@
     {
       "type": "stat",
       "title": "Go Goroutines",
+      "description": "Displays the number of active goroutines (lightweight threads) in the Go process running the Kafka exporter. A sudden increase may indicate resource leaks or high concurrency.",
+      "description": "Displays the number of active goroutines (lightweight threads) in the Go process running the Kafka exporter. A sudden increase may indicate resource leaks or high concurrency.",
       "datasource": "Prometheus",
       "targets": [ { "expr": "go_goroutines", "legendFormat": "Goroutines" } ],
       "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
@@ -79,6 +90,8 @@
     {
       "type": "stat",
       "title": "Process CPU Seconds",
+      "description": "Shows the total CPU time consumed by the Kafka exporter process. Useful for monitoring exporter resource usage and detecting performance issues.",
+      "description": "Shows the total CPU time consumed by the Kafka exporter process. Useful for monitoring exporter resource usage and detecting performance issues.",
       "datasource": "Prometheus",
       "targets": [ { "expr": "process_cpu_seconds_total", "legendFormat": "CPU Seconds" } ],
       "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
@@ -87,6 +100,8 @@
     {
       "type": "stat",
       "title": "Process Memory (RSS)",
+      "description": "Displays the resident set size (RSS) memory used by the Kafka exporter process. High or increasing memory usage may indicate memory leaks or excessive load.",
+      "description": "Displays the resident set size (RSS) memory used by the Kafka exporter process. High or increasing memory usage may indicate memory leaks or excessive load.",
       "datasource": "Prometheus",
       "targets": [ { "expr": "process_resident_memory_bytes", "legendFormat": "RSS" } ],
       "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },

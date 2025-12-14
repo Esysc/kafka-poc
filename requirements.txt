@@ -1,3 +1,4 @@
 ansible
 ansible-lint
 docker # dependency for community.docker
+aiohttp

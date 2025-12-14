@@ -31,6 +31,19 @@ services:
   # docker compose exec kafka kafka-topics --create --topic claims-input --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
   # docker compose exec kafka kafka-topics --create --topic claims-highvalue --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
 
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.5.0
+    hostname: schema-registry
+    container_name: kafka-poc-schema-registry-1
+    depends_on:
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+
   spring-kafka-claims:
     build:
       context: ./spring-kafka-claims
@@ -41,6 +54,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: default
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092  # KRaft: use internal broker port
+      SCHEMA_REGISTRY_URL: http://schema-registry:8081
     ports:
       - "8080:8080"
     healthcheck:

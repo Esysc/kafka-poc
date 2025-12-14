@@ -1,9 +1,14 @@
 
+
 # ---- Build stage ----
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /build
+# Copy only pom.xml and download dependencies (cache layer)
+COPY pom.xml .
+RUN mvn dependency:go-offline
+# Now copy the rest of the source
 COPY . .
-RUN mvn clean package -DskipTests
+RUN mvn package -DskipTests
 
 # ---- Run stage ----
 FROM eclipse-temurin:25-jdk-jammy

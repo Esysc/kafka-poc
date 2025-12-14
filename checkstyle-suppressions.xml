@@ -4,4 +4,6 @@
     "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 <suppressions>
     <suppress checks="HideUtilityClassConstructor" files="ClaimsApplication\.java"/>
+    <!-- Suppress all checks for generated Avro Claim.java file -->
+    <suppress checks=".*" files="spring-kafka-claims/src/main/java/com/example/claims/avro/Claim.java" />
 </suppressions>

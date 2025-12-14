@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "name": "Claim",
+  "namespace": "com.example.claims.avro",
+  "fields": [
+    {"name": "id", "type": "string"},
+    {"name": "patientId", "type": "string"},
+    {"name": "amount", "type": ["null", "double"], "default": null},
+    {"name": "status", "type": "string"},
+    {"name": "createdAt", "type": "string"}
+  ]
+}

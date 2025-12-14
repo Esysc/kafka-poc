@@ -1,6 +1,6 @@
 package com.example.claims.consumer;
 
-import com.example.claims.model.Claim;
+import com.example.claims.avro.Claim;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;

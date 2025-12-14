@@ -4,6 +4,9 @@ spring:
     consumer:
       group-id: claims-app
       auto-offset-reset: earliest
+    producer:
+      properties:
+        schema.registry.url: ${SCHEMA_REGISTRY_URL:http://schema-registry:8081}
     properties:
       spring.json.trusted.packages: com.example.claims.model,com.example"
     streams:

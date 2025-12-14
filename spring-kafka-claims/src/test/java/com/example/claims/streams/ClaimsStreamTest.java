@@ -1,7 +1,6 @@
 package com.example.claims.streams;
 
-import com.example.claims.model.Claim;
-import org.apache.kafka.clients.producer.ProducerRecord;
+import com.example.claims.avro.Claim;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.TopologyTestDriver;
 import org.apache.kafka.streams.TestInputTopic;
@@ -11,9 +10,8 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.kafka.support.serializer.JsonSerde;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 
-import java.time.Instant;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,18 +39,41 @@ public class ClaimsStreamTest {
 
     @Test
     public void testHighValueFiltered() {
-        JsonSerde<Claim> serde = new JsonSerde<>(Claim.class);
-        TestInputTopic<String, Claim> input = testDriver.createInputTopic("claims-input", Serdes.String().serializer(), serde.serializer());
-        TestOutputTopic<String, Claim> output = testDriver.createOutputTopic("claims-highvalue", Serdes.String().deserializer(), serde.deserializer());
+        try (SpecificAvroSerde<Claim> serde = new SpecificAvroSerde<>()) {
+            serde.configure(java.util.Collections.singletonMap("schema.registry.url", "mock://test"), false);
 
-        Claim low = new Claim("c1","p1",500.0,"NEW", Instant.now());
-        Claim high = new Claim("c2","p2",1500.0,"NEW", Instant.now());
+            TestInputTopic<String, Claim> input = testDriver.createInputTopic(
+                "claims-input",
+                Serdes.String().serializer(),
+                serde.serializer()
+            );
+            TestOutputTopic<String, Claim> output = testDriver.createOutputTopic(
+                "claims-highvalue",
+                Serdes.String().deserializer(),
+                serde.deserializer()
+            );
 
-        input.pipeInput(low.getId(), low);
-        input.pipeInput(high.getId(), high);
+            Claim low = Claim.newBuilder()
+                .setId("c1")
+                .setPatientId("p1")
+                .setAmount(500.0)
+                .setStatus("NEW")
+                .setCreatedAt(java.time.Instant.now().toString())
+                .build();
+            Claim high = Claim.newBuilder()
+                .setId("c2")
+                .setPatientId("p2")
+                .setAmount(1500.0)
+                .setStatus("NEW")
+                .setCreatedAt(java.time.Instant.now().toString())
+                .build();
 
-        assertTrue(output.isEmpty() == false);
-        Claim out = output.readValue();
-        assertEquals("c2", out.getId());
+            input.pipeInput(low.getId().toString(), low);
+            input.pipeInput(high.getId().toString(), high);
+
+            assertFalse(output.isEmpty());
+            Claim out = output.readValue();
+            assertEquals("c2", out.getId().toString());
+        }
     }
 }

@@ -32,7 +32,7 @@ services:
   # docker compose exec kafka kafka-topics --create --topic claims-highvalue --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:7.5.0
+    image: confluentinc/cp-schema-registry:8.1.1
     hostname: schema-registry
     container_name: kafka-poc-schema-registry-1
     depends_on:

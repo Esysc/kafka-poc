@@ -58,15 +58,24 @@ public class ClaimController {
 
     /**
      * Posts a claim to the Kafka topic.
-     * @param claim the claim
+     * @param claimDto the claim DTO
      * @return ResponseEntity with status
      * @throws JsonProcessingException if serialization fails
      */
     @PostMapping
-    public ResponseEntity<String> postClaim(@RequestBody final Claim claim)
+    public ResponseEntity<String> postClaim(
+        @RequestBody final ClaimDto claimDto)
         throws JsonProcessingException {
-        String claimId = claim.getId() != null
-            ? claim.getId().toString() : "default-claim-id";
+        // Convert ClaimDto to Avro Claim
+        Claim claim = new Claim();
+        claim.setId(claimDto.getId());
+        claim.setPatientId(claimDto.getPatientId());
+        claim.setAmount(claimDto.getAmount());
+        claim.setStatus(claimDto.getStatus());
+        claim.setCreatedAt(claimDto.getCreatedAt());
+
+        String claimId = claimDto.getId() != null
+            ? claimDto.getId() : "default-claim-id";
         LOG.info("Sending claim of type: {}", claim.getClass().getName());
         LOG.info(
                 "KafkaTemplate value serializer: {}",

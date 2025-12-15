@@ -9,13 +9,15 @@ spring:
         schema.registry.url: ${SCHEMA_REGISTRY_URL:http://schema-registry:8081}
     properties:
       spring.json.trusted.packages: com.example.claims.model,com.example"
+      schema.registry.url: ${SCHEMA_REGISTRY_URL:http://schema-registry:8081}
     streams:
       application-id: claims-streams-app
       auto-startup: true
       properties:
         cache.max.bytes.buffering: 0
         default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-        default.value.serde: org.springframework.kafka.support.serializer.JsonSerde
+        default.value.serde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+        schema.registry.url: ${SCHEMA_REGISTRY_URL:http://schema-registry:8081}
 
 server:
   port: 8080

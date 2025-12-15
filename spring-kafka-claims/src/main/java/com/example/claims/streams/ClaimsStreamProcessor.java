@@ -14,6 +14,7 @@ import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import java.time.Duration;
@@ -35,6 +36,10 @@ public class ClaimsStreamProcessor {
     /** Window size in minutes for aggregation. */
     private static final long WINDOW_MINUTES = 1L;
 
+    /** Schema registry URL from configuration. */
+    @Value("${spring.kafka.properties.schema.registry.url}")
+    private String schemaRegistryUrl;
+
     /**
      * Defines the main Kafka Streams processing pipeline for claims.
      *
@@ -45,11 +50,10 @@ public class ClaimsStreamProcessor {
     public KStream<String, Claim> kStream(final StreamsBuilder builder) {
         final SpecificAvroSerde<Claim> claimSerde = new SpecificAvroSerde<>();
         // Configure schema registry URL for Avro Serde
-        // (required for tests and runtime)
         Map<String, String> serdeConfig =
             Collections.singletonMap(
                 "schema.registry.url",
-                "mock://test"
+                schemaRegistryUrl
             );
         claimSerde.configure(serdeConfig, false);
 

@@ -1,8 +1,15 @@
 package com.example.claims.config;
 
-import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.StreamsConfig;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafkaStreams;
+import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration;
+import org.springframework.kafka.config.KafkaStreamsConfiguration;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Configuration for Kafka Streams.
@@ -10,14 +17,46 @@ import org.springframework.context.annotation.Configuration;
  * This class is not intended for extension.
  */
 @Configuration
+@EnableKafkaStreams
 public class KafkaStreamsConfig {
+    /** Kafka bootstrap servers. */
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
+    /** Schema registry URL. */
+    @Value("${spring.kafka.properties.schema.registry.url}")
+    private String schemaRegistryUrl;
+
+    /** Application ID for Kafka Streams. */
+    @Value("${spring.kafka.streams.application-id}")
+    private String applicationId;
+
     /**
-     * Provides a StreamsBuilder bean for Kafka Streams.
+     * Provides Kafka Streams configuration.
      *
-     * @return a new StreamsBuilder instance
+     * @return KafkaStreamsConfiguration bean
      */
-    @Bean
-    public StreamsBuilder streamsBuilder() {
-        return new StreamsBuilder();
+    @Bean(name = KafkaStreamsDefaultConfiguration
+        .DEFAULT_STREAMS_CONFIG_BEAN_NAME)
+    public KafkaStreamsConfiguration defaultKafkaStreamsConfig() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, applicationId);
+        props.put(
+            StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,
+            bootstrapServers
+        );
+        props.put(
+            StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG,
+            org.apache.kafka.common.serialization.Serdes
+                .StringSerde.class
+        );
+        props.put(
+            StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG,
+            io.confluent.kafka.streams.serdes.avro
+                .SpecificAvroSerde.class
+        );
+        props.put("schema.registry.url", schemaRegistryUrl);
+        props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
+        return new KafkaStreamsConfiguration(props);
     }
 }

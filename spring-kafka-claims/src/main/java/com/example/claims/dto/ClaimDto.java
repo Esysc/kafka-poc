@@ -18,6 +18,12 @@ public class ClaimDto {
     private String createdAt;
 
     /**
+     * Default constructor for JSON deserialization.
+     */
+    public ClaimDto() {
+    }
+
+    /**
      * Constructs a ClaimDto from an Avro Claim.
      * @param claim the Avro claim
      */
@@ -38,9 +44,19 @@ public class ClaimDto {
         return id;
     }
 
+    /** @param idParam the claim id */
+    public void setId(final String idParam) {
+        this.id = idParam;
+    }
+
     /** @return the patient id */
     public String getPatientId() {
         return patientId;
+    }
+
+    /** @param patientIdParam the patient id */
+    public void setPatientId(final String patientIdParam) {
+        this.patientId = patientIdParam;
     }
 
     /** @return the claim amount */
@@ -48,13 +64,28 @@ public class ClaimDto {
         return amount;
     }
 
+    /** @param amountParam the claim amount */
+    public void setAmount(final Double amountParam) {
+        this.amount = amountParam;
+    }
+
     /** @return the claim status */
     public String getStatus() {
         return status;
     }
 
+    /** @param statusParam the claim status */
+    public void setStatus(final String statusParam) {
+        this.status = statusParam;
+    }
+
     /** @return the creation timestamp */
     public String getCreatedAt() {
         return createdAt;
+    }
+
+    /** @param createdAtParam the creation timestamp */
+    public void setCreatedAt(final String createdAtParam) {
+        this.createdAt = createdAtParam;
     }
 }

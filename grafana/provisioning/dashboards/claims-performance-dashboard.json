@@ -1,0 +1,397 @@
+{
+  "id": null,
+  "uid": "claims-performance-dashboard",
+  "title": "Claims Application Performance",
+  "tags": ["claims", "performance", "latency", "metrics"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "API Response Time (POST /api/claims)",
+      "description": "Response time for POST /api/claims endpoint. Shows p50, p95, and p99 percentiles. High latency may indicate system overload, slow Kafka producer, or network issues.",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "claims_api_post_time_seconds{quantile=\"0.5\"}",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "claims_api_post_time_seconds{quantile=\"0.95\"}",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "claims_api_post_time_seconds{quantile=\"0.99\"}",
+          "legendFormat": "p99"
+        },
+        {
+          "expr": "claims_api_post_time_seconds_max",
+          "legendFormat": "max"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Claims Input Processing Time",
+      "description": "Time to process messages from claims-input topic by the consumer. Includes p50, p95, and p99 percentiles. High processing times indicate slow consumer logic or resource constraints.",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "claims_input_processing_time_seconds{quantile=\"0.5\"}",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "claims_input_processing_time_seconds{quantile=\"0.95\"}",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "claims_input_processing_time_seconds{quantile=\"0.99\"}",
+          "legendFormat": "p99"
+        },
+        {
+          "expr": "claims_input_processing_time_seconds_max",
+          "legendFormat": "max"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "High-Value Claims Processing Time",
+      "description": "Time to process high-value claims (amount > 1000). Shows latency percentiles for the high-value claims consumer.",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "claims_highvalue_processing_time_seconds{quantile=\"0.5\"}",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "claims_highvalue_processing_time_seconds{quantile=\"0.95\"}",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "claims_highvalue_processing_time_seconds{quantile=\"0.99\"}",
+          "legendFormat": "p99"
+        },
+        {
+          "expr": "claims_highvalue_processing_time_seconds_max",
+          "legendFormat": "max"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    },
+    {
+      "type": "stat",
+      "title": "Claims API Throughput (Rate)",
+      "description": "Rate of claims posted via the API endpoint per second. Calculated over 1-minute window.",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(claims_api_posted_total[1m])",
+          "legendFormat": "claims/sec"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "red" },
+              { "value": 0.1, "color": "yellow" },
+              { "value": 1, "color": "green" }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 8 }
+    },
+    {
+      "type": "stat",
+      "title": "Total Claims Posted",
+      "description": "Total number of claims posted via the API since application start.",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "claims_api_posted_total",
+          "legendFormat": "Total"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Claims Processing Throughput",
+      "description": "Rate of claims processed by consumers. Shows both input consumer and high-value consumer processing rates.",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(claims_input_processed_total[1m])",
+          "legendFormat": "Input Consumer"
+        },
+        {
+          "expr": "rate(claims_highvalue_processed_total[1m])",
+          "legendFormat": "High-Value Consumer"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 }
+    },
+    {
+      "type": "stat",
+      "title": "Total Input Claims Processed",
+      "description": "Total number of claims processed from claims-input topic.",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "claims_input_processed_total",
+          "legendFormat": "Total"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 16 }
+    },
+    {
+      "type": "stat",
+      "title": "Total High-Value Claims Processed",
+      "description": "Total number of high-value claims (amount > 1000) processed.",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "claims_highvalue_processed_total",
+          "legendFormat": "Total"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "blue" },
+              { "value": 10, "color": "yellow" },
+              { "value": 100, "color": "red" }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 16 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Consumer Lag (claims-input)",
+      "description": "Number of messages the claims-input consumer is behind. High or increasing lag indicates the consumer cannot keep up with the producer rate.",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "kafka_consumergroup_lag{consumergroup=\"claims-app\",topic=\"claims-input\"}",
+          "legendFormat": "partition {{partition}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Consumer Lag (claims-highvalue)",
+      "description": "Number of messages the high-value consumer is behind. Monitors backlog of high-priority claims.",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "kafka_consumergroup_lag{consumergroup=\"highvalue-consumer\",topic=\"claims-highvalue\"}",
+          "legendFormat": "partition {{partition}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 }
+    },
+    {
+      "type": "gauge",
+      "title": "Average API Response Time",
+      "description": "Current average response time for POST /api/claims endpoint over the last minute.",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(claims_api_post_time_seconds_sum[1m]) / rate(claims_api_post_time_seconds_count[1m])",
+          "legendFormat": "Average"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "green" },
+              { "value": 0.1, "color": "yellow" },
+              { "value": 0.5, "color": "red" }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 28 }
+    },
+    {
+      "type": "gauge",
+      "title": "Average Input Processing Time",
+      "description": "Current average processing time for claims-input consumer over the last minute.",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(claims_input_processing_time_seconds_sum[1m]) / rate(claims_input_processing_time_seconds_count[1m])",
+          "legendFormat": "Average"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "green" },
+              { "value": 0.1, "color": "yellow" },
+              { "value": 0.5, "color": "red" }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 28 }
+    },
+    {
+      "type": "gauge",
+      "title": "Average High-Value Processing Time",
+      "description": "Current average processing time for high-value claims consumer over the last minute.",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(claims_highvalue_processing_time_seconds_sum[1m]) / rate(claims_highvalue_processing_time_seconds_count[1m])",
+          "legendFormat": "Average"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "green" },
+              { "value": 0.1, "color": "yellow" },
+              { "value": 0.5, "color": "red" }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 28 }
+    },
+    {
+      "type": "stat",
+      "title": "High-Value Claims Rate",
+      "description": "Percentage of claims that are high-value (> 1000). Calculated as ratio of high-value to total input claims.",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "100 * claims_highvalue_processed_total / claims_input_processed_total",
+          "legendFormat": "Percentage"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 2,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "green" },
+              { "value": 10, "color": "yellow" },
+              { "value": 30, "color": "red" }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 28 }
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]
+  }
+}

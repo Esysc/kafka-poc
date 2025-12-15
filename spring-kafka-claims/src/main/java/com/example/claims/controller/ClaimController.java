@@ -18,6 +18,9 @@ import java.util.List;
 
 import com.example.claims.consumer.ClaimsInputConsumer;
 import org.apache.commons.text.StringEscapeUtils;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 /**
  * Controller for claim-related endpoints.
  * <p>
@@ -46,14 +49,26 @@ public class ClaimController {
     private static final Logger LOG = LoggerFactory.getLogger(
         ClaimController.class
     );
+    /** Timer for POST claim response time. */
+    private final Timer postClaimTimer;
+    /** Counter for posted claims. */
+    private final Counter claimsPostedCounter;
 
     /**
      * Constructs a ClaimController.
      * @param kafkaTemplateParam the KafkaTemplate
+     * @param registry the MeterRegistry
      */
     public ClaimController(
-        final KafkaTemplate<String, Claim> kafkaTemplateParam) {
+        final KafkaTemplate<String, Claim> kafkaTemplateParam,
+        final MeterRegistry registry) {
         this.kafkaTemplate = kafkaTemplateParam;
+        this.postClaimTimer = Timer.builder("claims.api.post.time")
+            .description("Time to process POST /api/claims requests")
+            .register(registry);
+        this.claimsPostedCounter = Counter.builder("claims.api.posted")
+            .description("Total claims posted via API")
+            .register(registry);
     }
 
     /**
@@ -66,27 +81,30 @@ public class ClaimController {
     public ResponseEntity<String> postClaim(
         @RequestBody final ClaimDto claimDto)
         throws JsonProcessingException {
-        // Convert ClaimDto to Avro Claim
-        Claim claim = new Claim();
-        claim.setId(claimDto.getId());
-        claim.setPatientId(claimDto.getPatientId());
-        claim.setAmount(claimDto.getAmount());
-        claim.setStatus(claimDto.getStatus());
-        claim.setCreatedAt(claimDto.getCreatedAt());
+        return postClaimTimer.record(() -> {
+            // Convert ClaimDto to Avro Claim
+            Claim claim = new Claim();
+            claim.setId(claimDto.getId());
+            claim.setPatientId(claimDto.getPatientId());
+            claim.setAmount(claimDto.getAmount());
+            claim.setStatus(claimDto.getStatus());
+            claim.setCreatedAt(claimDto.getCreatedAt());
 
-        String claimId = claimDto.getId() != null
-            ? claimDto.getId() : "default-claim-id";
-        LOG.info("Sending claim of type: {}", claim.getClass().getName());
-        LOG.info(
-                "KafkaTemplate value serializer: {}",
-                kafkaTemplate.getProducerFactory()
-                    .getConfigurationProperties()
-                    .get("value.serializer")
-            );
-        kafkaTemplate.send("claims-input", claimId, claim);
-        LOG.info("Posted claim with id {}", claimId);
-        String responseMessage = "{\"message\": \"Claim posted with id: "
-            + StringEscapeUtils.escapeJson(claimId) + "\"}";
-        return ResponseEntity.ok(responseMessage);
+            String claimId = claimDto.getId() != null
+                ? claimDto.getId() : "default-claim-id";
+            LOG.info("Sending claim of type: {}", claim.getClass().getName());
+            LOG.info(
+                    "KafkaTemplate value serializer: {}",
+                    kafkaTemplate.getProducerFactory()
+                        .getConfigurationProperties()
+                        .get("value.serializer")
+                );
+            kafkaTemplate.send("claims-input", claimId, claim);
+            claimsPostedCounter.increment();
+            LOG.info("Posted claim with id {}", claimId);
+            String responseMessage = "{\"message\": \"Claim posted with id: "
+                + StringEscapeUtils.escapeJson(claimId) + "\"}";
+            return ResponseEntity.ok(responseMessage);
+        });
     }
 }

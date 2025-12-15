@@ -86,6 +86,8 @@ To see high-value claims processed by the stream, run:
 docker compose exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic claims-highvalue --from-beginning
 ```
 
+![Grafana](doc/grafana-1.jpg)
+
 **2. Check application logs:**
 
 The Spring Boot app logs each high-value claim processed. Check the logs in your terminal or log file for lines like:

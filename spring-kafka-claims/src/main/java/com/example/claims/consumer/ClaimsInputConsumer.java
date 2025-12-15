@@ -6,6 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 
 
 /**
@@ -27,14 +30,26 @@ public class ClaimsInputConsumer {
     private static final List<Claim> RECEIVED_CLAIMS =
         new java.util.concurrent.CopyOnWriteArrayList<>();
 
+    /** Timer for claim processing time. */
+    private final Timer processingTimer;
+    /** Counter for processed claims. */
+    private final Counter processedCounter;
+
     /**
      * Constructor logs bean creation.
+     * @param registry the MeterRegistry
      */
-    public ClaimsInputConsumer() {
+    public ClaimsInputConsumer(final MeterRegistry registry) {
         LOG.info(
                 "ClaimsInputConsumer bean created and "
                 + "KafkaListener should be active."
             );
+        this.processingTimer = Timer.builder("claims.input.processing.time")
+            .description("Time to process claims-input messages")
+            .register(registry);
+        this.processedCounter = Counter.builder("claims.input.processed")
+            .description("Total claims processed from input topic")
+            .register(registry);
     }
 
     /**
@@ -55,15 +70,18 @@ public class ClaimsInputConsumer {
         containerFactory = "claimKafkaListenerContainerFactory"
     )
     public void listen(final Claim claim) {
-        LOG.debug(
-            "Kafka consumer triggered for claims-input topic"
-        );
-        if (claim == null) {
-            LOG.warn("Received null claim message");
-            return;
-        }
-        LOG.info("Received claim: {}", claim);
-        RECEIVED_CLAIMS.add(claim);
-        // Add your processing logic here
+        processingTimer.record(() -> {
+            LOG.debug(
+                "Kafka consumer triggered for claims-input topic"
+            );
+            if (claim == null) {
+                LOG.warn("Received null claim message");
+                return;
+            }
+            LOG.info("Received claim: {}", claim);
+            RECEIVED_CLAIMS.add(claim);
+            processedCounter.increment();
+            // Add your processing logic here
+        });
     }
 }

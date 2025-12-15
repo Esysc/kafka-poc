@@ -30,11 +30,19 @@ management:
   endpoint:
     prometheus:
       enabled: true
-
   metrics:
+    enable:
+      all: true
     distribution:
       percentiles-histogram:
         http.server.requests: true
+        claims.api.post.time: true
+        claims.input.processing.time: true
+        claims.highvalue.processing.time: true
+      percentiles:
+        claims.api.post.time: 0.5, 0.95, 0.99
+        claims.input.processing.time: 0.5, 0.95, 0.99
+        claims.highvalue.processing.time: 0.5, 0.95, 0.99
 
 logging:
   level:

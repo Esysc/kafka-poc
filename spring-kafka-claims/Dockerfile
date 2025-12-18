@@ -1,7 +1,7 @@
 
 
 # ---- Build stage ----
-FROM maven:3.9.6-eclipse-temurin-21 AS build
+FROM maven:3.9.11-eclipse-temurin-25 AS build
 WORKDIR /build
 # Copy only pom.xml and download dependencies (cache layer)
 COPY pom.xml .
